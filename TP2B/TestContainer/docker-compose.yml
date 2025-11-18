@@ -1,0 +1,44 @@
+version: "3.9"
+
+services:
+
+  mongo2:
+    image: mongo:7
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  mongo-express2:
+    image: mongo-express
+    container_name: mongo-express
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: admin
+    depends_on:
+      - mongo2
+
+  csv_to_xml:
+    build: ./csv_to_xml
+    container_name: csv_to_xml
+    depends_on:
+      - mongo2
+    volumes:
+      - ./:/data     # <-- mount your entire TestContainer
+
+  xml_to_mongo:
+    build: ./xml_to_mongo
+    container_name: xml_to_mongo
+    depends_on:
+      - csv_to_xml
+      - mongo2
+    volumes:
+      - ./:/data     # <-- same mount so xml and csv are shared
+
+volumes:
+  mongo_data:

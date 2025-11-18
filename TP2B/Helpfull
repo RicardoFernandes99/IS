@@ -1,0 +1,7 @@
+Caso exista MongoDB instalado localmente na mesma porta do Docker. Parar instacia para conseguir utilizar a UI do Compass. Não precisa com o MongoEXpress
+
+Get-Service MongoDB
+Stop-Service MongoDB
+Stop-Service -Name MongoDB -Force
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

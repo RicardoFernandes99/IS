@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+
+  mongo:
+    image: mongo:7
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  mongo-express:
+    image: mongo-express
+    container_name: mongo-express
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: admin
+    depends_on:
+      - mongo
+
+  rpc-server:
+    build: ./rpc-server
+    container_name: rpc-server
+    environment:
+      MONGO_URI: mongodb://mongo:27017
+    depends_on:
+      - mongo
+
+  rest-api:
+    build: ./rest-api
+    container_name: rest-api
+    ports:
+      - "8001:8001"
+    depends_on:
+      - rpc-server
+      - mongo
+volumes:
+  mongo_data:
