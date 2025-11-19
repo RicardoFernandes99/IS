@@ -38,5 +38,17 @@ services:
     depends_on:
       - rpc-server
       - mongo
+
+  flask-app:
+    build: ./flask-app
+    container_name: flask-app
+    ports:
+      - "5000:5000"
+    environment:
+      REST_API_URL: http://rest-api:8001
+      FLASK_SECRET_KEY: super-secret-change-me
+      REQUEST_TIMEOUT: "600"
+    depends_on:
+      - rest-api
 volumes:
   mongo_data:

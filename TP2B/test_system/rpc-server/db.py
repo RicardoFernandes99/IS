@@ -1,6 +1,9 @@
 from pymongo import MongoClient
 import os
 from bson import ObjectId
+from bson.errors import InvalidId
+import gridfs
+from gridfs.errors import NoFile
 
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://mongo:27017")
 DB_NAME = "testdb"
@@ -8,15 +11,18 @@ COLLECTION = "documents"
 
 client = MongoClient(MONGO_URI)
 db = client[DB_NAME]
-collection = db[COLLECTION]
+fs = gridfs.GridFS(db, collection=COLLECTION)
 
 def insert_xml(xml_string):
-    res = collection.insert_one({"xml": xml_string})
-    return str(res.inserted_id)
+    file_id = fs.put(xml_string.encode("utf-8"), content_type="application/xml")
+    return str(file_id)
 
 def get_document(doc_id):
-    doc = collection.find_one({"_id": ObjectId(doc_id)})
-    return doc["xml"] if doc else None
+    try:
+        file = fs.get(ObjectId(doc_id))
+        return file.read().decode("utf-8")
+    except (NoFile, InvalidId):
+        return None
 
 def list_documents():
-    return [str(d["_id"]) for d in collection.find({}, {"_id": 1})]
+    return [str(doc._id) for doc in fs.find().sort("uploadDate", -1)]

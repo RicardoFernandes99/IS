@@ -3,7 +3,7 @@ from lxml import etree
 import io
 
 def csv_to_xml(csv_bytes, root_name="root", row_name="row"):
-    df = pd.read_csv(io.BytesIO(csv_bytes))
+    df = pd.read_csv(io.BytesIO(csv_bytes), low_memory=False)
     
     root = etree.Element(root_name)
 

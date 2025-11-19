@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Document {{ doc_id }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; }
+        pre { background: #f7f7f7; padding: 1rem; border: 1px solid #ddd; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <a href="{{ url_for('index') }}">&larr; Back</a>
+    <h1>Document {{ doc_id }}</h1>
+    <pre>{{ xml }}</pre>
+</body>
+</html>

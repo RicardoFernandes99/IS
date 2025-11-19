@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>CSV → XML Uploader</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; }
+        .messages { margin-bottom: 1rem; }
+        .messages .error { color: #a33; }
+        .messages .message { color: #060; }
+        form { margin-bottom: 2rem; padding: 1rem; border: 1px solid #ccc; border-radius: 4px; }
+        label { display: block; margin-top: 0.5rem; }
+        input[type="text"], input[type="file"] { width: 100%; padding: 0.4rem; }
+        button { margin-top: 1rem; padding: 0.5rem 1rem; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 0.5rem; text-align: left; }
+        th { background: #f4f4f4; }
+    </style>
+</head>
+<body>
+    <h1>Upload CSV and Browse Documents</h1>
+
+    <div class="messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, msg in messages %}
+                    <div class="{{ 'error' if category == 'error' else 'message' }}">{{ msg }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+    </div>
+
+    <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
+        <h2>Upload CSV</h2>
+        <label for="csv_file">CSV File</label>
+        <input id="csv_file" type="file" name="csv_file" accept=".csv,text/csv" required />
+
+        <label for="root_name">Root element (default: root)</label>
+        <input id="root_name" type="text" name="root_name" placeholder="root" />
+
+        <label for="row_name">Row element (default: row)</label>
+        <input id="row_name" type="text" name="row_name" placeholder="row" />
+
+        <button type="submit">Convert &amp; Store</button>
+    </form>
+
+    <section>
+        <h2>Stored Documents</h2>
+        {% if documents %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Document ID</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doc_id in documents %}
+                        <tr>
+                            <td>{{ doc_id }}</td>
+                            <td>
+                                <a href="{{ url_for('view_document', doc_id=doc_id) }}">View</a> |
+                                <a href="{{ url_for('download_document', doc_id=doc_id) }}">Download XML</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No documents stored yet.</p>
+        {% endif %}
+    </section>
+</body>
+</html>
