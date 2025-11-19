@@ -4,6 +4,7 @@ from bson import ObjectId
 from bson.errors import InvalidId
 import gridfs
 from gridfs.errors import NoFile
+import gzip
 
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://mongo:27017")
 DB_NAME = "testdb"
@@ -14,13 +15,21 @@ db = client[DB_NAME]
 fs = gridfs.GridFS(db, collection=COLLECTION)
 
 def insert_xml(xml_string):
-    file_id = fs.put(xml_string.encode("utf-8"), content_type="application/xml")
+    compressed = gzip.compress(xml_string.encode("utf-8"))
+    file_id = fs.put(
+        compressed,
+        content_type="application/xml",
+        metadata={"compression": "gzip"},
+    )
     return str(file_id)
 
 def get_document(doc_id):
     try:
         file = fs.get(ObjectId(doc_id))
-        return file.read().decode("utf-8")
+        data = file.read()
+        if file.metadata and file.metadata.get("compression") == "gzip":
+            data = gzip.decompress(data)
+        return data.decode("utf-8")
     except (NoFile, InvalidId):
         return None
 

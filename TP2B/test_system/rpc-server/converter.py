@@ -1,16 +1,25 @@
-import pandas as pd
-from lxml import etree
+import csv
 import io
+from xml.sax.saxutils import escape
+
 
 def csv_to_xml(csv_bytes, root_name="root", row_name="row"):
-    df = pd.read_csv(io.BytesIO(csv_bytes), low_memory=False)
-    
-    root = etree.Element(root_name)
+    """Stream the CSV and build XML without loading entire dataframes."""
+    text_stream = io.TextIOWrapper(io.BytesIO(csv_bytes), encoding="utf-8", newline="")
+    reader = csv.DictReader(text_stream)
+    output = io.StringIO()
 
-    for _, row in df.iterrows():
-        row_el = etree.SubElement(root, row_name)
-        for col in df.columns:
-            el = etree.SubElement(row_el, col)
-            el.text = str(row[col])
+    output.write(f"<{root_name}>\n")
+    row_indent = "  "
+    col_indent = "    "
 
-    return etree.tostring(root, pretty_print=True, encoding="utf-8").decode()
+    for row in reader:
+        output.write(f"{row_indent}<{row_name}>\n")
+        for column, value in row.items():
+            safe_value = "" if value is None else value
+            output.write(f"{col_indent}<{column}>{escape(safe_value)}</{column}>\n")
+        output.write(f"{row_indent}</{row_name}>\n")
+
+    output.write(f"</{root_name}>\n")
+    text_stream.detach()
+    return output.getvalue()
