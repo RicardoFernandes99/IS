@@ -9,8 +9,8 @@
     </style>
 </head>
 <body>
-    <a href="{{ url_for('index') }}">&larr; Back</a>
+    <a href="{{ url_for('index', collection=collection) }}">&larr; Back</a>
     <h1>Document {{ doc_id }}</h1>
-    <pre>{{ xml }}</pre>
+    <pre>{{ doc | tojson(indent=2) }}</pre>
 </body>
 </html>

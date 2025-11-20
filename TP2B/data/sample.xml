@@ -1,0 +1,17 @@
+<root>
+  <row>
+    <name>Ricardo</name>
+    <age>22</age>
+    <city>Viana</city>
+  </row>
+  <row>
+    <name>Joao</name>
+    <age>30</age>
+    <city>Lisboa</city>
+  </row>
+  <row>
+    <name>Maria</name>
+    <age>45</age>
+    <city>Porto</city>
+  </row>
+</root>

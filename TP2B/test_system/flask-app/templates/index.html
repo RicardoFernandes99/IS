@@ -13,12 +13,17 @@
         input[type="text"], input[type="file"] { width: 100%; padding: 0.4rem; }
         button { margin-top: 1rem; padding: 0.5rem 1rem; }
         table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ddd; padding: 0.5rem; text-align: left; }
+        th, td { border: 1px solid #ddd; padding: 0.75rem; text-align: left; vertical-align: top; }
         th { background: #f4f4f4; }
+        .xml-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+        .action-card { border: 1px solid #ccc; border-radius: 6px; padding: 0.75rem; background: #fafafa; min-width: 180px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .action-card button { margin-top: 0.5rem; }
+        .xml-name { font-weight: 600; margin-bottom: 0.25rem; }
+        .xml-meta { color: #666; font-size: 0.9rem; }
     </style>
 </head>
 <body>
-    <h1>Upload CSV and Browse Documents</h1>
+    <h1>Convert Stored CSV and Browse Rows</h1>
 
     <div class="messages">
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -31,12 +36,15 @@
         {% if error %}
             <div class="error">{{ error }}</div>
         {% endif %}
+        {% if xml_error %}
+            <div class="error">{{ xml_error }}</div>
+        {% endif %}
     </div>
 
-    <form action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
-        <h2>Upload CSV</h2>
-        <label for="csv_file">CSV File</label>
-        <input id="csv_file" type="file" name="csv_file" accept=".csv,text/csv" required />
+    <form action="{{ url_for('upload') }}" method="post">
+        <h2>Convert CSV from shared data/</h2>
+        <label for="filename">CSV filename (placed in shared data directory)</label>
+        <input id="filename" type="text" name="filename" placeholder="example.csv" required />
 
         <label for="root_name">Root element (default: root)</label>
         <input id="root_name" type="text" name="root_name" placeholder="root" />
@@ -48,30 +56,43 @@
     </form>
 
     <section>
-        <h2>Stored Documents</h2>
-        {% if documents %}
+        <h2>XML Files in data/</h2>
+        {% if xml_files %}
             <table>
                 <thead>
                     <tr>
-                        <th>Document ID</th>
+                        <th>Filename</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for doc_id in documents %}
+                    {% for xml_file in xml_files %}
                         <tr>
-                            <td>{{ doc_id }}</td>
                             <td>
-                                <a href="{{ url_for('view_document', doc_id=doc_id) }}">View</a> |
-                                <a href="{{ url_for('download_document', doc_id=doc_id) }}">Download XML</a>
+                                <div class="xml-name">{{ xml_file }}</div>
+                                <div class="xml-meta">Will validate against {{ xml_file.replace('.xml', '.xsd') }}</div>
+                            </td>
+                            <td>
+                                <div class="xml-actions">
+                                    <form action="{{ url_for('validate_xml') }}" method="post" class="action-card">
+                                        <input type="hidden" name="xml_filename" value="{{ xml_file }}">
+                                        <button type="submit">Validate XML</button>
+                                    </form>
+                                    <form action="{{ url_for('import_xml') }}" method="post" class="action-card">
+                                        <input type="hidden" name="xml_filename" value="{{ xml_file }}">
+                                        <input type="text" name="collection" value="{{ collection }}" placeholder="Mongo collection" required />
+                                        <button type="submit">Import to MongoDB</button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
         {% else %}
-            <p>No documents stored yet.</p>
+            <p>No XML files found yet.</p>
         {% endif %}
     </section>
+
 </body>
 </html>

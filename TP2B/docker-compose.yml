@@ -1,6 +1,5 @@
-version: '3.9'
 services:
-  mongo2:
+  mongo:
     image: mongo:7
     container_name: mongo
     ports:
@@ -8,7 +7,7 @@ services:
     volumes:
       - mongo_data:/data/db
 
-  mongo-express2:
+  mongo-express:
     image: mongo-express
     container_name: mongo-express
     ports:
