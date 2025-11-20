@@ -134,51 +134,5 @@ def validate_xml():
 
     return redirect(url_for("index"))
 
-
-@app.route("/documents/<doc_id>", methods=["GET"])
-def view_document(doc_id: str):
-    collection = request.args.get("collection") or "rows"
-    target = f"{REST_API_URL}/documents/{doc_id}"
-    try:
-        resp = requests.get(target, params={"collection": collection}, timeout=REQUEST_TIMEOUT)
-    except requests.RequestException as exc:
-        flash(f"Unable to fetch document: {exc}", "error")
-        return redirect(url_for("index", collection=collection))
-
-    if resp.status_code == 404:
-        flash("Document not found", "error")
-        return redirect(url_for("index"))
-
-    if resp.status_code >= 400:
-        flash(f"Error retrieving document: {resp.status_code}", "error")
-        return redirect(url_for("index"))
-
-    doc_json = resp.json()
-    return render_template("document.html", doc_id=doc_id, doc=doc_json, collection=collection)
-
-
-@app.route("/documents/<doc_id>/download", methods=["GET"])
-def download_document(doc_id: str):
-    collection = request.args.get("collection") or "rows"
-    target = f"{REST_API_URL}/documents/{doc_id}"
-    try:
-        resp = requests.get(target, params={"collection": collection}, timeout=REQUEST_TIMEOUT)
-        if resp.status_code == 404:
-            flash("Document not found", "error")
-            return redirect(url_for("index", collection=collection))
-        resp.raise_for_status()
-    except requests.RequestException as exc:
-        flash(f"Unable to download document: {exc}", "error")
-        return redirect(url_for("index", collection=collection))
-
-    doc_json = resp.json()
-    filename = f"{doc_id}.json"
-    return Response(
-        json.dumps(doc_json, indent=2),
-        mimetype="application/json",
-        headers={"Content-Disposition": f"attachment; filename={filename}"},
-    )
-
-
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

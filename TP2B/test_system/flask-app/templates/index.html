@@ -15,9 +15,9 @@
         table { width: 100%; border-collapse: collapse; }
         th, td { border: 1px solid #ddd; padding: 0.75rem; text-align: left; vertical-align: top; }
         th { background: #f4f4f4; }
-        .xml-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
-        .action-card { border: 1px solid #ccc; border-radius: 6px; padding: 0.75rem; background: #fafafa; min-width: 180px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-        .action-card button { margin-top: 0.5rem; }
+        .xml-actions { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+        .xml-actions form { border: none; padding: 0; margin: 0; }
+        .xml-actions button { margin-top: 0; }
         .xml-name { font-weight: 600; margin-bottom: 0.25rem; }
         .xml-meta { color: #666; font-size: 0.9rem; }
     </style>
@@ -70,15 +70,15 @@
                         <tr>
                             <td>
                                 <div class="xml-name">{{ xml_file }}</div>
-                                <div class="xml-meta">Will validate against {{ xml_file.replace('.xml', '.xsd') }}</div>
+                                <div class="xml-meta"> {{ xml_file.replace('.xml', '.xsd') }}</div>
                             </td>
                             <td>
                                 <div class="xml-actions">
-                                    <form action="{{ url_for('validate_xml') }}" method="post" class="action-card">
+                                    <form action="{{ url_for('validate_xml') }}" method="post">
                                         <input type="hidden" name="xml_filename" value="{{ xml_file }}">
                                         <button type="submit">Validate XML</button>
                                     </form>
-                                    <form action="{{ url_for('import_xml') }}" method="post" class="action-card">
+                                    <form action="{{ url_for('import_xml') }}" method="post">
                                         <input type="hidden" name="xml_filename" value="{{ xml_file }}">
                                         <input type="text" name="collection" value="{{ collection }}" placeholder="Mongo collection" required />
                                         <button type="submit">Import to MongoDB</button>
