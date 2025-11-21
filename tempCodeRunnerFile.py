@@ -1,1 +1,0 @@
-scrapy runspider scraper.py
