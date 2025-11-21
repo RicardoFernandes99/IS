@@ -20,14 +20,25 @@ def _collection(name: str = None):
 
 
 def _detect_row_tag(source) -> str:
-    """Detect the first child element tag (row tag) from a stream/path."""
-    context = etree.iterparse(source, events=("start",))
+    """Detect the row tag; if wrapped in <Group>, return the child row tag instead."""
+    source_path = str(source)
     row_tag = None
-    for _, elem in context:
-        # The root element has no parent; the first element with a parent is a row candidate
-        if elem.getparent() is not None:
+
+    # First pass: find the first element with a parent (could be Group or row).
+    for _, elem in etree.iterparse(source_path, events=("start",), huge_tree=True):
+        if elem.getparent() is not None and isinstance(elem.tag, str):
             row_tag = elem.tag
             break
+
+    # If the first non-root element is a grouping wrapper, find its first child element tag.
+    if row_tag == "Group":
+        for _, group in etree.iterparse(source_path, events=("end",), tag="Group", huge_tree=True):
+            for child in group.iterchildren():
+                if isinstance(child.tag, str):
+                    row_tag = child.tag
+                    break
+            break
+
     if not row_tag:
         raise ValueError("Unable to detect row tag in XML.")
     return row_tag

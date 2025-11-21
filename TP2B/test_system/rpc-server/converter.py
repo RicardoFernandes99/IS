@@ -4,6 +4,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, Tuple, Union
 from xml.sax.saxutils import escape
+import subprocess
 
 from lxml import etree
 
@@ -33,33 +34,6 @@ def csv_file_to_xml(csv_path: Union[str, Path], xml_path: Union[str, Path], root
     xsd_content = generate_xsd_from_xml(xml_path, root_name=root_name, row_name=row_name)
     xsd_path.write_text(xsd_content, encoding="utf-8")
 
-def generate_xsd_from_csv(csv_path, root_name="root", row_name="row"):
-    with Path(csv_path).open("r", encoding="utf-8", newline="") as f:
-        reader = csv.DictReader(f)
-        cols = reader.fieldnames or []
-        first_row = next(reader, {})  
-    lines = [
-        '<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">',
-        f'  <xs:element name="{escape(root_name)}">',
-        "    <xs:complexType>",
-        "      <xs:sequence>",
-        f'        <xs:element name="{escape(row_name)}" minOccurs="0" maxOccurs="unbounded">',
-        "          <xs:complexType>",
-        "            <xs:sequence>",
-    ]
-    for col in cols:
-        lines.append(f'              <xs:element name="{escape(col)}" type="{_simple_type(first_row.get(col, ""))}" minOccurs="0"/>')
-    lines += [
-        "            </xs:sequence>",
-        "          </xs:complexType>",
-        "        </xs:element>",
-        "      </xs:sequence>",
-        "    </xs:complexType>",
-        "  </xs:element>",
-        "</xs:schema>",
-    ]
-    return "\n".join(lines)
-
 
 def generate_xsd_from_xml(xml_path, root_name=None, row_name="row", attr_tag=None, max_samples: int = 200):
     """Derive an XSD from the XML content by sampling row elements."""
@@ -68,6 +42,15 @@ def generate_xsd_from_xml(xml_path, root_name=None, row_name="row", attr_tag=Non
     field_types, group_tag, group_attributes = _infer_fields_from_xml(
         xml_path, row_name=row_name, max_samples=max_samples
     )
+    # Drop extra wrapper when the inferred group tag duplicates the row or attr name.
+    if group_tag:
+        if (
+            group_tag.lower() == row_name.lower()
+            or group_tag.lower() == detected_root.lower()
+            or (attr_tag and group_tag.lower() == attr_tag.lower())
+        ):
+            group_tag = None
+            group_attributes = []
     return _build_xsd(
         detected_root,
         row_name,
@@ -235,40 +218,38 @@ def xml_xsd_validator(xml_filename: str, xsd_filename: str) -> Tuple[bool, str]:
         return False, f"{type(exc).__name__}: {exc}"
 
 
-def group_by_attribute(xml_path, row_tag="row", attr_tag="City", filter_value=None):
-    """Stream rows and group by attr_tag (child element). If filter_value is set, keep only that value."""
-    xml_path = Path(xml_path)
-    groups = defaultdict(list)
-
-    for _, elem in etree.iterparse(str(xml_path), events=("end",), tag=row_tag, huge_tree=True):
-        matches = elem.xpath(f"./{attr_tag}/text()")
-        attr_val = matches[0] if matches else ""
-        if filter_value is None or attr_val == filter_value:
-            groups[attr_val].append(etree.tostring(elem, encoding="unicode"))
-        elem.clear()
-        parent = elem.getparent()
-        if parent is not None:
-            while parent.getprevious() is not None:
-                del parent.getparent()[0]
-
-    for attr_val, rows in groups.items():
-        yield f'<Group {attr_tag}="{attr_val}">\n' + "\n".join(rows) + "\n</Group>"
-
-
 def group_and_write(xml_path, row_tag="row", attr_tag="City", filter_value=None, output_path=None, root_name="root"):
-    """Group rows by attr_tag and write grouped XML."""
-    xml_path = Path(xml_path)
-    out_path = Path(output_path) if output_path else xml_path.with_name(
-        f"{xml_path.stem}_grouped_by_{attr_tag.lower()}_{filter_value or 'all'}.xml"
+    xml_path = Path(xml_path).resolve()
+    xquery_file = Path("group_query.xq").resolve()
+
+    out_path = (
+        Path(output_path)
+        if output_path
+        else xml_path.with_name(
+            f"{xml_path.stem}_grouped_by_{attr_tag.lower()}_{filter_value or 'all'}.xml"
+        )
     )
 
-    grouped_blocks = list(group_by_attribute(xml_path, row_tag=row_tag, attr_tag=attr_tag, filter_value=filter_value))
+    cmd = [
+        "basex",
+        f"-bfile={xml_path}",
+        f"-brow={row_tag}",
+        f"-battr={attr_tag}",
+        f"-bfilter={filter_value or ''}",
+        f"-broot={root_name}",
+        str(xquery_file),
+    ]
 
-    with out_path.open("w", encoding="utf-8", newline="") as f:
-        f.write(f"<{root_name}>\n")
-        for block in grouped_blocks:
-            f.write(block)
-            f.write("\n")
-        f.write(f"</{root_name}>\n")
-    xsd_content = generate_xsd_from_xml(out_path, root_name=root_name, row_name=row_tag, attr_tag=attr_tag)
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True)
+    except FileNotFoundError as exc:
+        raise RuntimeError("BaseX CLI ('basex') not found in PATH. Ensure it is installed in the container.") from exc
+
+    if result.returncode != 0:
+        raise RuntimeError(f"XQuery failed (exit {result.returncode}): {result.stderr or result.stdout}")
+
+    out_path.write_text(result.stdout, encoding="utf-8")
+
+    xsd_content = generate_xsd_from_xml(out_path, root_name=root_name, row_name=row_tag, attr_tag=None)
     out_path.with_suffix(".xsd").write_text(xsd_content, encoding="utf-8")
+    return out_path
