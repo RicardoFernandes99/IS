@@ -19,3 +19,6 @@ def list_documents(collection=None):
 
 def get_document(doc_id, collection=None):
     return rpc.get_document(doc_id, collection)
+
+def group_xml_file(xml_filename, attr_tag, filter_value=None, row_tag="row", root_name="root", output_filename=None):
+    return rpc.group_xml_file(xml_filename, attr_tag, filter_value, row_tag, root_name, output_filename)

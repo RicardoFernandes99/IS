@@ -20,6 +20,33 @@ def convert_stored_csv(
 
     return {"status": "ok", "source": filename, **result}
 
+@app.post("/group-xml")
+def group_xml(
+    filename: str = Form(...),
+    attr_tag: str = Form(...),
+    filter_value: str = Form(None),
+    row_tag: str = Form("row"),
+    root_name: str = Form("root"),
+    output_filename: str = Form(None),
+):
+    """Create a grouped/filtered XML + XSD from an existing XML in the shared data dir."""
+    if not filename or not attr_tag:
+        raise HTTPException(400, "filename and attr_tag are required.")
+
+    try:
+        result = rpc_client.group_xml_file(
+            filename,
+            attr_tag=attr_tag,
+            filter_value=filter_value,
+            row_tag=row_tag,
+            root_name=root_name,
+            output_filename=output_filename,
+        )
+    except Exception as exc:
+        raise HTTPException(400, f"Unable to group XML '{filename}': {exc}")
+
+    return {"status": "ok", "source": filename, **result}
+
 @app.get("/xml-files")
 def list_xml_files():
     return {"files": rpc_client.list_xml_files()}

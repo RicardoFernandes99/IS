@@ -83,6 +83,13 @@
                                         <input type="text" name="collection" value="{{ collection }}" placeholder="Mongo collection" required />
                                         <button type="submit">Import to MongoDB</button>
                                     </form>
+                                    <form action="{{ url_for('group_xml') }}" method="post" class="group-form">
+                                        <input type="hidden" name="xml_filename" value="{{ xml_file }}">
+                                        <input type="text" name="attr_tag" placeholder="Attribute (e.g., City)" required />
+                                        <input type="text" name="filter_value" placeholder="Filter value (e.g., London)" />
+                                        <input type="text" name="row_tag" placeholder="Row tag (default: row)" />
+                                        <button type="submit">Create Filtered XML</button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>

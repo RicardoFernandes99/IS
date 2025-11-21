@@ -43,6 +43,24 @@ def _validate_xml(filename: str, xsd_filename: str):
         return None, str(exc)
 
 
+def _group_xml(filename: str, attr_tag: str, filter_value: str, row_tag: str):
+    try:
+        resp = requests.post(
+            f"{REST_API_URL}/group-xml",
+            data={
+                "filename": filename,
+                "attr_tag": attr_tag,
+                "filter_value": filter_value,
+                "row_tag": row_tag,
+            },
+            timeout=REQUEST_TIMEOUT,
+        )
+        resp.raise_for_status()
+        return resp.json(), None
+    except requests.RequestException as exc:
+        return None, str(exc)
+
+
 @app.route("/", methods=["GET"])
 def index():
     collection = request.args.get("collection") or "Collection"
@@ -131,6 +149,28 @@ def validate_xml():
             flash(f"Validation succeeded: {message}")
         else:
             flash(f"Validation failed: {message}", "error")
+
+    return redirect(url_for("index"))
+
+
+@app.route("/group-xml", methods=["POST"])
+def group_xml():
+    filename = request.form.get("xml_filename", "").strip()
+    attr_tag = request.form.get("attr_tag", "").strip()
+    filter_value = request.form.get("filter_value", "").strip()
+    row_tag = request.form.get("row_tag") or "row"
+    if not filename or not attr_tag:
+        flash("Provide XML filename and attribute name to filter/group.", "error")
+        return redirect(url_for("index"))
+
+    result, error = _group_xml(filename, attr_tag, filter_value, row_tag)
+    if error:
+        flash(f"Group/Filter failed: {error}", "error")
+    else:
+        xml_out = result.get("xml_file")
+        xsd_out = result.get("xsd_file")
+        target = filter_value or "all"
+        flash(f"Created grouped XML ({attr_tag}={target}): {xml_out} (+ {xsd_out})")
 
     return redirect(url_for("index"))
 
