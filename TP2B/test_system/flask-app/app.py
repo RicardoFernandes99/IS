@@ -1,10 +1,16 @@
 import os
 import json
+import csv
+from pathlib import Path
 from flask import Flask, render_template, request, redirect, url_for, flash, Response
 import requests
+from werkzeug.utils import secure_filename
 
 REST_API_URL = os.getenv("REST_API_URL", "http://rest-api:8001")
 REQUEST_TIMEOUT = int(os.getenv("REQUEST_TIMEOUT", "600"))
+# Use shared data dir (container volume) by default; can be overridden with env `DATA_DIR`
+DATA_DIR = Path(os.getenv("DATA_DIR", "/data/shared"))
+DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "dev-secret")
@@ -61,6 +67,80 @@ def _group_xml(filename: str, attr_tag: str, filter_value: str, row_tag: str):
         return None, str(exc)
 
 
+def _is_valid_csv(file_storage) -> tuple:
+    """Basic validation for uploaded CSV files.
+
+    - Checks extension is .csv
+    - Reads a small sample and ensures first line contains a comma
+    - Resets stream position after sampling
+    Returns (True, "") on success or (False, reason) on failure.
+    """
+    filename = (getattr(file_storage, 'filename', '') or '').strip()
+    if not filename or not filename.lower().endswith('.csv'):
+        return False, "Filename must have a .csv extension"
+
+    stream = file_storage.stream
+    try:
+        sample_bytes = stream.read(4096)
+        # reset for later save
+        stream.seek(0)
+    except Exception:
+        return False, "Unable to read uploaded file"
+
+    if not sample_bytes:
+        return False, "Uploaded file is empty"
+
+    try:
+        sample = sample_bytes.decode('utf-8', errors='replace')
+    except Exception:
+        sample = str(sample_bytes)
+
+    # check for comma in first line
+    first_line = sample.splitlines()[0] if sample.splitlines() else ''
+    if ',' not in first_line:
+        return False, "File does not look like a CSV (no commas found in header)"
+
+    # optional: try csv sniff (best-effort)
+    try:
+        sniffer = csv.Sniffer()
+        dialect = sniffer.sniff(sample)
+        # prefer comma delimiter
+        if getattr(dialect, 'delimiter', ',') != ',':
+            # still allow but warn
+            pass
+    except Exception:
+        # if sniff fails, don't block — we already checked commas
+        pass
+
+    return True, ""
+
+
+@app.route("/upload-file", methods=["POST"])
+def upload_file():
+    """Endpoint to upload a CSV file to the shared data directory."""
+    uploaded = request.files.get('file')
+    if not uploaded:
+        flash('Choose a file to upload.', 'error')
+        return redirect(url_for('index'))
+
+    filename = (uploaded.filename or '').strip()
+    valid, reason = _is_valid_csv(uploaded)
+    if not valid:
+        flash(f'Upload failed: {reason}', 'error')
+        return redirect(url_for('index'))
+
+    safe_name = secure_filename(filename)
+    target_path = DATA_DIR / safe_name
+    try:
+        # FileStorage.save accepts a path-like or string; convert to str for compatibility
+        uploaded.save(str(target_path))
+        flash(f'Uploaded CSV saved as: {safe_name}')
+    except Exception as exc:
+        flash(f'Failed to save file: {exc}', 'error')
+
+    return redirect(url_for('index'))
+
+
 def getMongoCollections():
     try:
         resp = requests.get(
@@ -91,6 +171,16 @@ def index():
         collections=collections,
         collections_error=collections_error,
     )
+
+
+@app.route("/see_csv_file_data", methods=["GET"])
+def see_csv_file_data():
+    """Return a JSON object with CSV filenames found in DATA_DIR."""
+    try:
+        files = [p.name for p in DATA_DIR.iterdir() if p.is_file() and p.name.lower().endswith('.csv')]
+        return Response(json.dumps({"files": files}), mimetype="application/json")
+    except Exception as exc:
+        return Response(json.dumps({"files": [], "error": str(exc)}), mimetype="application/json", status=500)
 
 
 @app.route("/upload", methods=["POST"])

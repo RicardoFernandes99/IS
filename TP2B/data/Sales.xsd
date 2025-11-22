@@ -1,0 +1,32 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+  <xs:element name="root">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="row" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Date" type="xs:date" />
+              <xs:element name="Day" type="xs:int" />
+              <xs:element name="Month" type="xs:string" />
+              <xs:element name="Year" type="xs:int" />
+              <xs:element name="Customer_Age" type="xs:int" />
+              <xs:element name="Age_Group" type="xs:string" />
+              <xs:element name="Customer_Gender" type="xs:string" />
+              <xs:element name="Country" type="xs:string" />
+              <xs:element name="State" type="xs:string" />
+              <xs:element name="Product_Category" type="xs:string" />
+              <xs:element name="Sub_Category" type="xs:string" />
+              <xs:element name="Product" type="xs:string" />
+              <xs:element name="Order_Quantity" type="xs:int" />
+              <xs:element name="Unit_Cost" type="xs:int" />
+              <xs:element name="Unit_Price" type="xs:int" />
+              <xs:element name="Profit" type="xs:int" />
+              <xs:element name="Cost" type="xs:int" />
+              <xs:element name="Revenue" type="xs:int" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

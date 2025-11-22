@@ -38,6 +38,8 @@ services:
       REST_API_URL: http://rest-api:8001
       FLASK_SECRET_KEY: super-secret-change-me
       REQUEST_TIMEOUT: "600"
+    volumes:
+      - ../data:/data/shared
     depends_on:
       - rest-api
 volumes:

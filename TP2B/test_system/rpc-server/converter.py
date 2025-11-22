@@ -7,12 +7,27 @@ from xml.sax.saxutils import escape
 import subprocess
 
 from lxml import etree
+import re
 
 DATA_DIR = Path("/data/shared")
+
+
+def is_valid_csv(path: str, delimiter: str = ",") -> bool:
+    try:
+        with open(path, newline='', encoding="utf-8") as f:
+            reader = csv.reader(f, delimiter=delimiter)
+            for _ in reader:
+                pass  # Só tentar ler tudo
+        return True
+    except Exception:
+        return False
 
 def csv_file_to_xml(csv_path: Union[str, Path], xml_path: Union[str, Path], root_name="root", row_name="row") -> None:
     csv_path = Path(csv_path)
     xml_path = Path(xml_path)
+
+    if not is_valid_csv(str(csv_path)):
+        raise ValueError(f"Invalid CSV file: {csv_path}")
 
     with csv_path.open("r", encoding="utf-8", newline="") as csv_file, \
          xml_path.open("w", encoding="utf-8", newline="") as xml_file:
@@ -199,8 +214,15 @@ def _build_xsd(root_name: str, row_name: str, fields: Dict[str, str], group_tag=
     return "\n".join(lines)
     
 
+def validate_filename(filename: str) -> bool:
+    pattern = r"^(?!\.)([A-Za-z0-9_-]+)\.[A-Za-z0-9_-]+$"
+    return bool(re.match(pattern, filename))
+
 def xml_xsd_validator(xml_filename: str, xsd_filename: str) -> Tuple[bool, str]:
     """Stream-validate an XML file against XSD; returns (ok, message)."""
+    if not (validate_filename(xml_filename) and validate_filename(xsd_filename)):
+        return False, "Invalid filename(s)"
+    
     xml_path = DATA_DIR / xml_filename
     xsd_path = DATA_DIR / xsd_filename
 

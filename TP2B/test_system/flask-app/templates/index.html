@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8" />
     <title>CSV → XML Uploader</title>
@@ -15,30 +16,62 @@
             --accent-2: #b6b9be;
             --border: #d9e1ee;
         }
-        * { box-sizing: border-box; }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
             padding: 2rem;
             font-family: "Inter", system-ui, -apple-system, sans-serif;
             background: radial-gradient(circle at 20% 20%, rgba(37, 99, 235, 0.12), transparent 35%),
-                        radial-gradient(circle at 80% 0%, rgba(14, 165, 233, 0.1), transparent 30%),
-                        var(--bg);
+                radial-gradient(circle at 80% 0%, rgba(14, 165, 233, 0.1), transparent 30%),
+                var(--bg);
             color: var(--text);
         }
-        h1 { margin-bottom: 1rem; letter-spacing: 0.5px; font-size: 1.5rem; }
-        h2 { margin: 0 0 1rem; font-size: 1.1rem; }
-        .shell { max-width: 1200px; margin: 0 auto; }
+
+        h1 {
+            margin-bottom: 1rem;
+            letter-spacing: 0.5px;
+            font-size: 1.5rem;
+        }
+
+        h2 {
+            margin: 0 0 1rem;
+            font-size: 1.1rem;
+        }
+
+        .shell {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
         .panel {
             background: var(--panel);
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 1.25rem;
             margin-bottom: 1.5rem;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
         }
-        .panel .hint { color: var(--muted); font-size: 0.9rem; margin-top: -0.5rem; margin-bottom: 0.75rem; }
-        label { display: block; margin-top: 0.5rem; font-size: 0.9rem; color: var(--muted); }
-        input[type="text"], input[type="file"] {
+
+        .panel .hint {
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin-top: -0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        label {
+            display: block;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        input[type="text"],
+        input[type="file"] {
             width: 100%;
             padding: 0.55rem 0.7rem;
             border-radius: 8px;
@@ -48,6 +81,7 @@
             margin-top: 0.35rem;
             font-size: 0.95rem;
         }
+
         .btn {
             display: inline-flex;
             align-items: center;
@@ -60,31 +94,53 @@
             cursor: pointer;
             color: #0b0f1a;
             background: linear-gradient(135deg, var(--accent), var(--accent-2));
-            box-shadow: 0 10px 30px rgba(124,58,237,0.35);
+            box-shadow: 0 10px 30px rgba(124, 58, 237, 0.35);
             transition: transform 120ms ease, box-shadow 120ms ease;
             margin-top: 1rem;
         }
+
         .btn.secondary {
             background: var(--panel-lite);
             color: var(--text);
             border: 1px solid var(--border);
             box-shadow: none;
         }
-        .btn:hover { transform: translateY(-1px); box-shadow: 0 14px 34px rgba(124,58,237,0.4); }
-        .messages { margin-bottom: 1rem; display: grid; gap: 0.5rem; }
-        .messages .error, .messages .message {
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 14px 34px rgba(124, 58, 237, 0.4);
+        }
+
+        .messages {
+            margin-bottom: 1rem;
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .messages .error,
+        .messages .message {
             padding: 0.75rem 1rem;
             border-radius: 10px;
             border: 1px solid var(--border);
         }
-        .messages .error { background: rgba(239, 68, 68, 0.08); color: #fca5a5; }
-        .messages .message { background: rgba(34, 197, 94, 0.08); color: #bbf7d0; }
+
+        .messages .error {
+            background: rgba(239, 68, 68, 0.08);
+            color: #fca5a5;
+        }
+
+        .messages .message {
+            background: rgba(34, 197, 94, 0.08);
+            color: #bbf7d0;
+        }
+
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
             gap: 1rem;
             align-items: stretch;
         }
+
         .xml-card {
             background: var(--card);
             border: 1px solid var(--border);
@@ -97,24 +153,62 @@
             word-break: break-word;
             height: 100%;
         }
+
         .xml-head {
             display: flex;
             flex-direction: column;
             gap: 0.2rem;
-            min-height: 3.4rem; /* reserves space for 2-line names + meta */
+            min-height: 3.4rem;
+            /* reserves space for 2-line names + meta */
         }
-        .xml-name { font-weight: 700; letter-spacing: 0.2px; }
-        .xml-meta { color: var(--muted); font-size: 0.9rem; }
-        .xml-name, .xml-meta {
+
+        .xml-name {
+            font-weight: 700;
+            letter-spacing: 0.2px;
+        }
+
+        .xml-meta {
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        .xml-name,
+        .xml-meta {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        .xml-actions { display: grid; gap: 0.6rem; flex: 1; }
-        .xml-actions form { margin: 0; }
-        .inline { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 0.5rem; }
-        .subtle { color: var(--muted); font-size: 0.9rem; margin-top: -0.25rem; }
-        .collection-list { display: grid; gap: 0.35rem; list-style: none; padding: 0; margin: 0; }
+
+        .xml-actions {
+            display: grid;
+            gap: 0.6rem;
+            flex: 1;
+        }
+
+        .xml-actions form {
+            margin: 0;
+        }
+
+        .inline {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 0.5rem;
+        }
+
+        .subtle {
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin-top: -0.25rem;
+        }
+
+        .collection-list {
+            display: grid;
+            gap: 0.35rem;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
         .collection-item {
             padding: 0.55rem 0.75rem;
             border-radius: 10px;
@@ -124,31 +218,43 @@
         }
     </style>
 </head>
+
 <body>
     <div class="shell">
         <h1 style="color: White;">TP 2B</h1>
 
         <div class="messages">
             {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, msg in messages %}
-                        <div class="{{ 'error' if category == 'error' else 'message' }}">{{ msg }}</div>
-                    {% endfor %}
-                {% endif %}
+            {% if messages %}
+            {% for category, msg in messages %}
+            <div class="{{ 'error' if category == 'error' else 'message' }}">{{ msg }}</div>
+            {% endfor %}
+            {% endif %}
             {% endwith %}
             {% if error %}
-                <div class="error">{{ error }}</div>
+            <div class="error">{{ error }}</div>
             {% endif %}
             {% if xml_error %}
-                <div class="error">{{ xml_error }}</div>
+            <div class="error">{{ xml_error }}</div>
             {% endif %}
         </div>
+
+        <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data" class="panel">
+            <h2>Upload CSV</h2>
+            <div class="hint">Upload a CSV file to the shared <code>data/</code> folder.</div>
+            <label for="file">Choose CSV file</label>
+            <input id="file" type="file" name="file" accept=".csv,text/csv" required />
+
+            <button type="submit" class="btn">Upload File</button>
+        </form>
 
         <form action="{{ url_for('upload') }}" method="post" class="panel">
             <h2>Convert CSV to XML/</h2>
             <div class="hint">Files must be in data folder <code>data/</code> folder.</div>
             <label for="filename">CSV filename</label>
-            <input id="filename" type="text" name="filename" placeholder="example.csv" required />
+            <select id="csv_filename_select" name="filename" required>
+                <option value="">Loading CSV files…</option>
+            </select>
 
             <label for="root_name">Root element (default: root)</label>
             <input id="root_name" type="text" name="root_name" placeholder="root" />
@@ -159,71 +265,105 @@
             <button type="submit" class="btn">Convert &amp; Store</button>
         </form>
 
+        <script>
+            async function loadCsvFiles() {
+                try {
+                    const res = await fetch("{{ url_for('see_csv_file_data') }}");
+                    if (!res.ok) return;
+                    const data = await res.json();
+                    const files = data.files || [];
+                    const sel = document.getElementById('csv_filename_select');
+                    sel.innerHTML = '';
+                    if (files.length === 0) {
+                        const opt = document.createElement('option');
+                        opt.value = '';
+                        opt.text = 'No CSV files found';
+                        sel.appendChild(opt);
+                        sel.disabled = true;
+                    } else {
+                        files.forEach(function (f) {
+                            const opt = document.createElement('option');
+                            opt.value = f;
+                            opt.text = f;
+                            sel.appendChild(opt);
+                        });
+                        sel.disabled = false;
+                    }
+                } catch (e) {
+                    console.error('Failed to load CSV files', e);
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', loadCsvFiles);
+        </script>
+
         <section class="panel">
             <h2>Mongo Collections</h2>
             <div class="hint">Available collections</div>
             {% if collections_error %}
-                <div class="error">{{ collections_error }}</div>
+            <div class="error">{{ collections_error }}</div>
             {% endif %}
             {% if collections %}
-                <ul class="collection-list">
-                    {% for col in collections %}
-                        <li class="collection-item">{{ col }}</li>
-                    {% endfor %}
-                </ul>
+            <ul class="collection-list">
+                {% for col in collections %}
+                <li class="collection-item">{{ col }}</li>
+                {% endfor %}
+            </ul>
             {% else %}
-                <p class="subtle">No collections found.</p>
+            <p class="subtle">No collections found.</p>
             {% endif %}
         </section>
 
         <section class="panel">
             <h2>XML Files</h2>
             {% if xml_files %}
-                <div class="grid">
-                    {% for xml_file in xml_files %}
-                        <div class="xml-card">
-                            <div class="xml-head">
-                                <div class="xml-name">{{ xml_file }}</div>
-                                <div class="xml-meta">{{ xml_file.replace('.xml', '.xsd') }}</div>
+            <div class="grid">
+                {% for xml_file in xml_files %}
+                <div class="xml-card">
+                    <div class="xml-head">
+                        <div class="xml-name">{{ xml_file }}</div>
+                        <div class="xml-meta">{{ xml_file.replace('.xml', '.xsd') }}</div>
+                    </div>
+                    <div class="xml-actions">
+                        <form action="{{ url_for('validate_xml') }}" method="post">
+                            <input type="hidden" name="xml_filename" value="{{ xml_file }}">
+                            <button type="submit" class="btn secondary">Validate XML</button>
+                        </form>
+                        <form action="{{ url_for('import_xml') }}" method="post">
+                            <input type="hidden" name="xml_filename" value="{{ xml_file }}">
+                            <label class="subtle">Mongo collection</label>
+                            <input type="text" name="collection" value="{{ collection }}" placeholder="Collection name"
+                                required />
+                            <button type="submit" class="btn secondary">Import to MongoDB</button>
+                        </form>
+                        <form action="{{ url_for('group_xml') }}" method="post" class="group-form">
+                            <input type="hidden" name="xml_filename" value="{{ xml_file }}">
+                            <div class="inline">
+                                <div>
+                                    <label class="subtle">Attribute</label>
+                                    <input type="text" name="attr_tag" placeholder="Attribute to Filter" required />
+                                </div>
+                                <div>
+                                    <label class="subtle">Filter value</label>
+                                    <input type="text" name="filter_value" placeholder="Attribute Value" />
+                                </div>
+                                <div>
+                                    <label class="subtle">Row tag</label>
+                                    <input type="text" name="row_tag" placeholder="Default Row" />
+                                </div>
                             </div>
-                            <div class="xml-actions">
-                                <form action="{{ url_for('validate_xml') }}" method="post">
-                                    <input type="hidden" name="xml_filename" value="{{ xml_file }}">
-                                    <button type="submit" class="btn secondary">Validate XML</button>
-                                </form>
-                                <form action="{{ url_for('import_xml') }}" method="post">
-                                    <input type="hidden" name="xml_filename" value="{{ xml_file }}">
-                                    <label class="subtle">Mongo collection</label>
-                                    <input type="text" name="collection" value="{{ collection }}" placeholder="Collection name" required />
-                                    <button type="submit" class="btn secondary">Import to MongoDB</button>
-                                </form>
-                                <form action="{{ url_for('group_xml') }}" method="post" class="group-form">
-                                    <input type="hidden" name="xml_filename" value="{{ xml_file }}">
-                                    <div class="inline">
-                                        <div>
-                                            <label class="subtle">Attribute</label>
-                                            <input type="text" name="attr_tag" placeholder="Attribute to Filter" required />
-                                        </div>
-                                        <div>
-                                            <label class="subtle">Filter value</label>
-                                            <input type="text" name="filter_value" placeholder="Attribute Value" />
-                                        </div>
-                                        <div>
-                                            <label class="subtle">Row tag</label>
-                                            <input type="text" name="row_tag" placeholder="Default Row" />
-                                        </div>
-                                    </div>
-                                    <button type="submit" class="btn secondary">Create Sub-XML</button>
-                                </form>
-                            </div>
-                        </div>
-                    {% endfor %}
+                            <button type="submit" class="btn secondary">Create Sub-XML</button>
+                        </form>
+                    </div>
                 </div>
+                {% endfor %}
+            </div>
             {% else %}
-                <p class="subtle">No XML files found yet.</p>
+            <p class="subtle">No XML files found yet.</p>
             {% endif %}
         </section>
     </div>
 
 </body>
+
 </html>
