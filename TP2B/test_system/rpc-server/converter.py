@@ -50,7 +50,6 @@ def csv_file_to_xml(csv_path: Union[str, Path], xml_path: Union[str, Path], root
 
 
 def generate_xsd_from_xml(xml_path, root_name=None, row_name="row", attr_tag=None, max_samples: int = 200):
-    """Derive an XSD from the XML content by sampling row elements."""
     xml_path = Path(xml_path)
     detected_root = root_name or _detect_root_tag(xml_path) or "root"
     field_types, group_tag, group_attributes = _infer_fields_from_xml(

@@ -35,11 +35,6 @@ def rpc_convert_csv_to_file(filename, root_name="root", row_name="row"):
 
 
 def rpc_group_xml_file(xml_filename, attr_tag, filter_value=None, row_tag="row", root_name="root", output_filename=None):
-    """
-    Generate a grouped/filtered XML (and XSD) from an existing XML in DATA_DIR.
-    attr_tag: child element name to group/filter by (e.g., City)
-    filter_value: value to keep; if None, groups all values.
-    """
     source_path = _resolve_in_data(xml_filename)
     if not source_path.is_file():
         raise FileNotFoundError(f"XML file not found: {xml_filename}")

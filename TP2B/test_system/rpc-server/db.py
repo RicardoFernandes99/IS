@@ -45,7 +45,6 @@ def _detect_row_tag(source) -> str:
 
 
 def insert_xml_file(xml_path: Union[str, Path], collection: str = None) -> List[str]:
-    """Stream an XML file on disk and insert rows in batches."""
     xml_path = str(xml_path)
     row_tag = _detect_row_tag(xml_path)
 
@@ -66,7 +65,7 @@ def insert_xml_file(xml_path: Union[str, Path], collection: str = None) -> List[
         elem.clear()
         parent = elem.getparent()
         if parent is not None:
-            while parent.getprevious() is not None:
+            while parent.getprevious() is not None: # Need for multiple Group
                 del parent.getparent()[0]
 
     if batch:

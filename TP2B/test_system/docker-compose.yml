@@ -14,7 +14,7 @@ services:
     container_name: rpc-server
     environment:
       MONGO_URI: mongodb://mongo:27017
-    # Shared storage for CSV/XML accessible to the XML-RPC server (and indirectly via API)
+    # Bind directory
     volumes:
       - ../data:/data/shared
     depends_on:
