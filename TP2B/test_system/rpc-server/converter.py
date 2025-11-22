@@ -94,7 +94,7 @@ def _detect_root_tag(xml_path: Path) -> str:
     return "root"
 
 
-def _infer_fields_from_xml(xml_path: Path, row_name="row", max_samples: int = 200):
+def _infer_fields_from_xml(xml_path: Path, row_name="row", max_samples: int = 10000):
     field_types: Dict[str, str] = {}
     group_tag = None
     group_attributes = []
@@ -155,15 +155,15 @@ def _build_xsd(root_name: str, row_name: str, fields: Dict[str, str], group_tag=
 
     if group_tag:
         lines += [
-            f'        <xs:element name="{escape(group_tag)}" minOccurs="0" maxOccurs="unbounded">',
+            f'        <xs:element name="{escape(group_tag)}" >',
             "          <xs:complexType>",
             "            <xs:sequence>",
-            f'              <xs:element name="{escape(row_name)}" minOccurs="0" maxOccurs="unbounded">',
+            f'              <xs:element name="{escape(row_name)}" >',
             "                <xs:complexType>",
             "                  <xs:sequence>",
         ]
         for col, xsd_type in fields.items():
-            lines.append(f'                    <xs:element name="{escape(col)}" type="{xsd_type}" minOccurs="0"/>')
+            lines.append(f'                    <xs:element name="{escape(col)}" type="{xsd_type}"/>')
         lines += [
             "                  </xs:sequence>",
             "                </xs:complexType>",
@@ -178,12 +178,12 @@ def _build_xsd(root_name: str, row_name: str, fields: Dict[str, str], group_tag=
         ]
     else:
         lines += [
-            f'        <xs:element name="{escape(row_name)}" minOccurs="0" maxOccurs="unbounded">',
+            f'        <xs:element name="{escape(row_name)}" >',
             "          <xs:complexType>",
             "            <xs:sequence>",
         ]
         for col, xsd_type in fields.items():
-            lines.append(f'              <xs:element name="{escape(col)}" type="{xsd_type}" minOccurs="0"/>')
+            lines.append(f'              <xs:element name="{escape(col)}" type="{xsd_type}" />')
         lines += [
             "            </xs:sequence>",
             "          </xs:complexType>",
@@ -226,10 +226,9 @@ def group_and_write(xml_path, row_tag="row", attr_tag="City", filter_value=None,
         Path(output_path)
         if output_path
         else xml_path.with_name(
-            f"{xml_path.stem}_grouped_by_{attr_tag.lower()}_{filter_value or 'all'}.xml"
+            f"{xml_path.stem}_groupBy_{attr_tag.lower()}_{filter_value or 'all'}.xml"
         )
     )
-
     cmd = [
         "basex",
         f"-bfile={xml_path}",

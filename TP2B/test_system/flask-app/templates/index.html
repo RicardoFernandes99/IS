@@ -5,23 +5,23 @@
     <title>CSV → XML Uploader</title>
     <style>
         :root {
-            --bg: #0f172a;
-            --panel: #111827;
-            --panel-lite: #1f2937;
-            --card: #162034;
-            --text: #e5e7eb;
-            --muted: #94a3b8;
-            --accent: #7c3aed;
-            --accent-2: #22d3ee;
-            --border: #1f2937;
+            --bg: #212431;
+            --panel: #ffffff;
+            --panel-lite: #eef1f7;
+            --card: #ffffff;
+            --text: #0f172a;
+            --muted: #4b5563;
+            --accent: #b6b9be;
+            --accent-2: #b6b9be;
+            --border: #d9e1ee;
         }
         * { box-sizing: border-box; }
         body {
             margin: 0;
             padding: 2rem;
             font-family: "Inter", system-ui, -apple-system, sans-serif;
-            background: radial-gradient(circle at 20% 20%, rgba(124, 58, 237, 0.15), transparent 35%),
-                        radial-gradient(circle at 80% 0%, rgba(34, 211, 238, 0.12), transparent 30%),
+            background: radial-gradient(circle at 20% 20%, rgba(37, 99, 235, 0.12), transparent 35%),
+                        radial-gradient(circle at 80% 0%, rgba(14, 165, 233, 0.1), transparent 30%),
                         var(--bg);
             color: var(--text);
         }
@@ -126,7 +126,7 @@
 </head>
 <body>
     <div class="shell">
-        <h1>TP 2B</h1>
+        <h1 style="color: White;">TP 2B</h1>
 
         <div class="messages">
             {% with messages = get_flashed_messages(with_categories=true) %}
