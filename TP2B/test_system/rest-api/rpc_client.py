@@ -1,4 +1,6 @@
 from xmlrpc.client import ServerProxy
+from pymongo import MongoClient
+
 
 rpc = ServerProxy("http://rpc-server:8000/RPC2", allow_none=True)
 

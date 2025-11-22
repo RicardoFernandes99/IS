@@ -114,11 +114,19 @@
         .xml-actions form { margin: 0; }
         .inline { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 0.5rem; }
         .subtle { color: var(--muted); font-size: 0.9rem; margin-top: -0.25rem; }
+        .collection-list { display: grid; gap: 0.35rem; list-style: none; padding: 0; margin: 0; }
+        .collection-item {
+            padding: 0.55rem 0.75rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--panel-lite);
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
     <div class="shell">
-        <h1>Convert Stored CSV and Browse Rows</h1>
+        <h1>TP 2B</h1>
 
         <div class="messages">
             {% with messages = get_flashed_messages(with_categories=true) %}
@@ -137,8 +145,8 @@
         </div>
 
         <form action="{{ url_for('upload') }}" method="post" class="panel">
-            <h2>Convert CSV from shared data/</h2>
-            <div class="hint">Files must already exist in the shared <code>data/</code> folder.</div>
+            <h2>Convert CSV to XML/</h2>
+            <div class="hint">Files must be in data folder <code>data/</code> folder.</div>
             <label for="filename">CSV filename</label>
             <input id="filename" type="text" name="filename" placeholder="example.csv" required />
 
@@ -150,6 +158,23 @@
 
             <button type="submit" class="btn">Convert &amp; Store</button>
         </form>
+
+        <section class="panel">
+            <h2>Mongo Collections</h2>
+            <div class="hint">Available collections</div>
+            {% if collections_error %}
+                <div class="error">{{ collections_error }}</div>
+            {% endif %}
+            {% if collections %}
+                <ul class="collection-list">
+                    {% for col in collections %}
+                        <li class="collection-item">{{ col }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="subtle">No collections found.</p>
+            {% endif %}
+        </section>
 
         <section class="panel">
             <h2>XML Files</h2>

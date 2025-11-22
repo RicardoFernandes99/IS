@@ -61,11 +61,26 @@ def _group_xml(filename: str, attr_tag: str, filter_value: str, row_tag: str):
         return None, str(exc)
 
 
+def getMongoCollections():
+    try:
+        resp = requests.get(
+            f"{REST_API_URL}/collections",
+            timeout=REQUEST_TIMEOUT,
+        )
+        resp.raise_for_status()
+        return resp.json(), None
+    except requests.RequestException as exc:
+        return None, str(exc)
+    
+
 @app.route("/", methods=["GET"])
 def index():
     collection = request.args.get("collection") or "Collection"
     documents, error = _fetch_documents(collection)
     xml_files, xml_error = _fetch_xml_files()
+    collections, collections_error = getMongoCollections()
+    if collections is None:
+        collections = []
     return render_template(
         "index.html",
         documents=documents,
@@ -73,6 +88,8 @@ def index():
         xml_files=xml_files,
         xml_error=xml_error,
         collection=collection,
+        collections=collections,
+        collections_error=collections_error,
     )
 
 

@@ -1,7 +1,11 @@
+import os
 from fastapi import FastAPI, Form, HTTPException
 import rpc_client
-
+from pymongo import MongoClient
 app = FastAPI()
+
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://mongo:27017")
+DB_NAME = os.getenv("MONGO_DB_NAME", "testdb")
 
 @app.post("/convert-stored-csv")
 def convert_stored_csv(
@@ -65,7 +69,7 @@ def import_xml(
     except Exception as exc:
         raise HTTPException(400, f"Unable to import XML '{filename}': {exc}")
 
-    return {"status": "ok", "inserted_ids": inserted_ids, "inserted_count": len(inserted_ids)}
+    return {"status": "ok","Total Inserted Documents": len(inserted_ids)}
 
 @app.post("/validate-xml")
 def validate_xml(
@@ -93,3 +97,14 @@ def get_doc(doc_id: str, collection: str = "Collection"):
     if not doc:
         raise HTTPException(404, "Document not found")
     return doc
+
+client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
+db = client[DB_NAME]
+
+@app.get("/collections")
+def getMongoCollections():
+    try:
+        collections = db.list_collection_names()
+        return collections
+    except Exception as exc:
+        raise HTTPException(500, f"Unable to list collections: {exc}")
