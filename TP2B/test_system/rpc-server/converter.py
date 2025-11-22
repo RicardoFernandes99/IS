@@ -158,7 +158,7 @@ def _build_xsd(root_name: str, row_name: str, fields: Dict[str, str], group_tag=
             f'        <xs:element name="{escape(group_tag)}" >',
             "          <xs:complexType>",
             "            <xs:sequence>",
-            f'              <xs:element name="{escape(row_name)}" >',
+            f'              <xs:element name="{escape(row_name)}" maxOccurs="unbounded">',
             "                <xs:complexType>",
             "                  <xs:sequence>",
         ]
@@ -178,7 +178,7 @@ def _build_xsd(root_name: str, row_name: str, fields: Dict[str, str], group_tag=
         ]
     else:
         lines += [
-            f'        <xs:element name="{escape(row_name)}" >',
+            f'        <xs:element name="{escape(row_name)}" maxOccurs="unbounded">',
             "          <xs:complexType>",
             "            <xs:sequence>",
         ]
