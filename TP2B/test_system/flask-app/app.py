@@ -231,7 +231,8 @@ def import_xml():
         )
         resp.raise_for_status()
         payload = resp.json()
-        flash(f"Imported {filename}. Inserted rows: {payload.get('inserted_count')}")
+        inserted = payload.get("Total Inserted Documents")
+        flash(f"Imported {filename}. Inserted Documents: {inserted}")
     except requests.RequestException as exc:
         flash(f"Import failed: {exc}", "error")
 

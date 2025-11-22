@@ -1,5 +1,4 @@
 import csv
-from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Tuple, Union
@@ -57,7 +56,6 @@ def generate_xsd_from_xml(xml_path, root_name=None, row_name="row", attr_tag=Non
     field_types, group_tag, group_attributes = _infer_fields_from_xml(
         xml_path, row_name=row_name, max_samples=max_samples
     )
-    # Drop extra wrapper when the inferred group tag duplicates the row or attr name.
     if group_tag:
         if (
             group_tag.lower() == row_name.lower()

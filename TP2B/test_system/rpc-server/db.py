@@ -24,13 +24,13 @@ def _detect_row_tag(source) -> str:
     source_path = str(source)
     row_tag = None
 
-    # First pass: find the first element with a parent (could be Group or row).
+    # Might be a subXML
     for _, elem in etree.iterparse(source_path, events=("start",), huge_tree=True):
         if elem.getparent() is not None and isinstance(elem.tag, str):
             row_tag = elem.tag
             break
 
-    # If the first non-root element is a grouping wrapper, find its first child element tag.
+    # If it is Grouped
     if row_tag == "Group":
         for _, group in etree.iterparse(source_path, events=("end",), tag="Group", huge_tree=True):
             for child in group.iterchildren():
