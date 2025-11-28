@@ -89,5 +89,6 @@ with SimpleXMLRPCServer(("0.0.0.0", 8000), requestHandler=Handler, allow_none=Tr
     server.register_function(rpc_group_xml_file, "group_xml_file")
     server.register_function(rpc_get_document, "get_document")
     server.register_function(rpc_list_documents, "list_documents")
+    print("registered functions." + ", ".join(server.system_listMethods()))
 
     server.serve_forever()
